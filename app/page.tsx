@@ -1,15 +1,8 @@
-import { DeployButton } from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import { AuthButton } from "@/components/auth-button";
-import { Hero } from "@/components/hero";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { ConnectSupabaseSteps } from "@/components/tutorial/connect-supabase-steps";
-import { SignUpUserSteps } from "@/components/tutorial/sign-up-user-steps";
-import { hasEnvVars } from "@/lib/utils";
-import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
-  return (
-    <main className="min-h-screen flex flex-col items-center">hiii mofos!!!!!</main>
-  );
+export default async function Instruments() {
+  const supabase = await createClient();
+  const { data: instruments } = await supabase.from("businesses").select();
+
+  return <pre>{JSON.stringify(instruments, null, 2)}</pre>;
 }
