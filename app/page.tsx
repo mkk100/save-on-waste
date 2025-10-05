@@ -1,20 +1,16 @@
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
-import "leaflet/dist/leaflet.css";
-import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css";
-import "leaflet-defaulticon-compatibility";
+"use client";
 
 import dynamic from "next/dynamic";
-const DynamicMapComponent = dynamic(() => import("./Map"), { ssr: !!false });
 
-export default async function Instruments() {
-  const supabase = await createClient();
-  const { data: instruments } = await supabase.from("businesses").select();
+const LazyMap = dynamic(() => import("./Map"), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
+
+export default function Home() {
   return (
-    <pre>
-      {JSON.stringify(instruments, null, 2)}
-      <Button>Hello World</Button>
-      <DynamicMapComponent />
-    </pre>
+    <main>
+      <LazyMap />
+    </main>
   );
 }
