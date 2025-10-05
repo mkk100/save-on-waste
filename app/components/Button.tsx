@@ -1,6 +1,7 @@
 'use client';
 
-import { Button, Modal, Box, Typography, Slide, TextField } from '@mui/material';
+import { Button, Modal, Box, Typography, Slide, TextField, Select, MenuItem, FormControl, InputLabel, Chip, IconButton } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { useState } from 'react';
 
 const modalStyle = {
@@ -17,13 +18,35 @@ const modalStyle = {
   outline: 'none',
 };
 
+const foodCategories = ['Meat', 'Dairy', 'Vegetables', 'Carbs'];
+
 export default function UploadButton() {
   const [open, setOpen] = useState(false);
-  const [foodCategory, setFoodCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [addedCategories, setAddedCategories] = useState<string[]>([]);
   const [foodWeight, setFoodWeight] = useState('');
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const handleAddCategory = () => {
+    if (selectedCategory && !addedCategories.includes(selectedCategory)) {
+      setAddedCategories([...addedCategories, selectedCategory]);
+      setSelectedCategory('');
+    }
+  };
+
+  const handleRemoveCategory = (categoryToRemove: string) => {
+    setAddedCategories(addedCategories.filter(category => category !== categoryToRemove));
+  };
+
+  const handleConfirm = () => {
+    // Handle form submission here
+    console.log('Categories:', addedCategories);
+    console.log('Weight:', foodWeight);
+    // Close modal after confirmation
+    handleClose();
+  };
 
   return (
     <>
@@ -53,13 +76,47 @@ export default function UploadButton() {
             </Typography>
 
               <Typography variant="body1">Category of food:</Typography>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={foodCategory}
-                onChange={(e) => setFoodCategory(e.target.value)}
-                placeholder="Enter food category"
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <FormControl variant="outlined" sx={{ flex: 1 }}>
+                  <InputLabel>Select category</InputLabel>
+                  <Select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    label="Select category"
+                  >
+                    {foodCategories.map((category) => (
+                      <MenuItem key={category} value={category}>
+                        {category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <IconButton 
+                  onClick={handleAddCategory} 
+                  color="primary"
+                  disabled={!selectedCategory || addedCategories.includes(selectedCategory)}
+                >
+                  <AddIcon />
+                </IconButton>
+              </Box>
+
+              {/* Display added categories */}
+              {addedCategories.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" sx={{ mb: 1 }}>Selected categories:</Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {addedCategories.map((category) => (
+                      <Chip
+                        key={category}
+                        label={category}
+                        onDelete={() => handleRemoveCategory(category)}
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
               
               <Typography variant="body1">Weight of food (kgs):</Typography>
               <TextField
@@ -69,7 +126,24 @@ export default function UploadButton() {
                 value={foodWeight}
                 onChange={(e) => setFoodWeight(e.target.value)}
                 placeholder="Enter weight in kg"
+                sx={{ mb: 3 }}
               />
+
+              {/* Confirm button at bottom right */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                  variant="contained"
+                  onClick={handleConfirm}
+                  sx={{
+                    backgroundColor: '#4CAF50',
+                    '&:hover': {
+                      backgroundColor: '#45a049',
+                    },
+                  }}
+                >
+                  Confirm
+                </Button>
+              </Box>
             </Box>
         </Slide>
       </Modal>
