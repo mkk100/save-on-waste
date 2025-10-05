@@ -2,9 +2,8 @@
 import "leaflet/dist/leaflet.css";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
-import { useEffect, useMemo, useState } from "react";
-import Typography from "@mui/material/Typography";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client"; // Change to client
 import GrabButton from "@/app/components/GrabButton";
 
 interface Business {
@@ -13,16 +12,14 @@ interface Business {
   unit_number: string;
   postal_code: string;
   name: string;
-  latitude: number | null;
-  longitude: number | null;
+  latitude: number;
+  longitude: number;
   meat_grams: number;
   vegetables_grams: number;
   carbohydrates_grams: number;
   dairy_grams: number;
   dessert_grams: number;
 }
-
-const defaultCenter: [number, number] = [1.3521, 103.8198];
 
 // Fix for default markers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -39,15 +36,10 @@ export default function MapComponent() {
   useEffect(() => {
     async function fetchBusinesses() {
       try {
-        const supabase = createClient();
-        const { data: businessData, error } = await supabase
+        const supabase = createClient(); // No await needed for client
+        const { data: businessData } = await supabase
           .from("businesses")
           .select();
-
-        if (error) {
-          throw error;
-        }
-
         if (businessData) {
           setBusinesses(businessData);
         }
@@ -61,61 +53,42 @@ export default function MapComponent() {
     fetchBusinesses();
   }, []);
 
-  const locations = useMemo(
-    () =>
-      businesses
-        .map((business) => [business.latitude, business.longitude] as const)
-        .filter(
-          (entry): entry is [number, number] =>
-            entry[0] !== null && entry[1] !== null,
-        ),
-    [businesses],
-  );
-
   if (loading) {
     return <div>Loading map...</div>;
   }
 
-  const mapCenter = locations[0] ?? defaultCenter;
-  const mapBounds = locations.length > 1 ? locations : undefined;
-
   return (
     <MapContainer
-      center={mapCenter}
-      bounds={mapBounds}
+      bounds={businesses.map((business) => [
+        business.latitude,
+        business.longitude,
+      ])}
       zoom={11}
-      scrollWheelZoom
-      style={{ height: "400px", width: "600px" }}
+      scrollWheelZoom={true}
+      style={{ height: "100vh", width: "100vw" }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {businesses.map((business, index) => {
-        if (business.latitude === null || business.longitude === null) {
-          return null;
-        }
-
-        return (
-          <Marker
-            key={business.uuid ?? index}
-            position={[business.latitude, business.longitude]}
-          >
-            <Popup>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                {business.name}
-              </Typography>
-              <GrabButton
-                meat_grams={business.meat_grams ?? 0}
-                vegetable_grams={business.vegetables_grams ?? 0}
-                carbohydrates_grams={business.carbohydrates_grams ?? 0}
-                dairy_grams={business.dairy_grams ?? 0}
-                dessert_grams={business.dessert_grams ?? 0}
-              />
-            </Popup>
-          </Marker>
-        );
-      })}
+      {businesses.map((business, index) => (
+        <Marker
+          key={business.uuid || index}
+          position={[business.latitude, business.longitude]}
+        >
+          <Popup>
+            {business.name}
+            <br />
+            <GrabButton
+              meat_grams={business.meat_grams}
+              vegetable_grams={business.vegetables_grams}
+              carbohydrates_grams={business.carbohydrates_grams}
+              dairy_grams={business.dairy_grams}
+              dessert_grams={business.dessert_grams}
+            />
+          </Popup>
+        </Marker>
+      ))}
     </MapContainer>
   );
 }

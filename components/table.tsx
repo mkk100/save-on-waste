@@ -9,56 +9,112 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 
-function createData(
-  businessName: string,
-  address: string,
-  meat: number,
-  vegetables: number,
-  carbohydrates: number,
-  dairy: number,
-  dessert: number
-) {
-  return { businessName, address, meat, vegetables, carbohydrates, dairy, dessert };
+type Row = {
+  charity_name: string;
+  meat_grams_taken: number;
+  vegetables_grams_taken: number;
+  carbohydrates_grams_taken: number;
+  dairy_grams_taken: number;
+  dessert_grams_taken: number;
+  time_taken: string; // ISO timestamp
+  pickup_time: string | null; // ISO timestamp or null
+};
+
+function createRow(
+  charity_name: string,
+  meat_grams_taken: number,
+  vegetables_grams_taken: number,
+  carbohydrates_grams_taken: number,
+  dairy_grams_taken: number,
+  dessert_grams_taken: number,
+  time_taken: string,
+  pickup_time: string | null
+): Row {
+  return {
+    charity_name,
+    meat_grams_taken,
+    vegetables_grams_taken,
+    carbohydrates_grams_taken,
+    dairy_grams_taken,
+    dessert_grams_taken,
+    time_taken,
+    pickup_time,
+  };
 }
 
-const rows = [
-  createData("Green Bistro", "123 Main St", 25, 18, 32, 9, 11),
-  createData("Fresh Market", "456 Oak Ave", 41, 23, 27, 15, 8),
-  createData("Urban Cafe", "789 Pine Rd", 19, 31, 16, 22, 19),
-  createData("Corner Deli", "321 Elm St", 33, 14, 29, 11, 7),
-  createData("Sunset Restaurant", "654 Maple Dr", 8, 0, 3, 18, 14),
+const rows: Row[] = [
+  createRow(
+    "Myo's Charity",
+    120,
+    80,
+    150,
+    40,
+    20,
+    "2025-10-05T09:30:00Z",
+    "2025-10-05T10:00:00Z"
+  ),
+  createRow(
+    "Lynn's Charity",
+    200,
+    50,
+    120,
+    60,
+    10,
+    "2025-10-04T14:20:00Z",
+    null
+  ),
+  createRow(
+    "Min's Charity",
+    0,
+    20,
+    0,
+    0,
+    5,
+    "2025-10-03T18:45:00Z",
+    "2025-10-03T19:00:00Z"
+  ),
 ];
 
 export default function FoodWasteTable() {
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} size="small" aria-label="food waste table">
+      <Table sx={{ minWidth: 800 }} size="small" aria-label="donation table">
         <TableHead>
           <TableRow>
-            <TableCell>Business Name</TableCell>
-            <TableCell>Address</TableCell>
-            <TableCell align="right">Meat&nbsp;(g)</TableCell>
-            <TableCell align="right">Vegetables&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Dairy&nbsp;(g)</TableCell>
-            <TableCell align="right">Dessert&nbsp;(g)</TableCell>
+            <TableCell>Charity Name</TableCell>
+            <TableCell align="right">Meat (g)</TableCell>
+            <TableCell align="right">Vegetables (g)</TableCell>
+            <TableCell align="right">Carbohydrates (g)</TableCell>
+            <TableCell align="right">Dairy (g)</TableCell>
+            <TableCell align="right">Dessert (g)</TableCell>
+            <TableCell align="right">Time Taken</TableCell>
+            <TableCell align="right">Pickup Time</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row) => (
             <TableRow
-              key={row.businessName}
+              key={row.charity_name}
               sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                {row.businessName}
+                {row.charity_name}
               </TableCell>
-              <TableCell>{row.address}</TableCell>
-              <TableCell align="right">{row.meat}</TableCell>
-              <TableCell align="right">{row.vegetables}</TableCell>
-              <TableCell align="right">{row.carbohydrates}</TableCell>
-              <TableCell align="right">{row.dairy}</TableCell>
-              <TableCell align="right">{row.dessert}</TableCell>
+              <TableCell align="right">{row.meat_grams_taken}</TableCell>
+              <TableCell align="right">{row.vegetables_grams_taken}</TableCell>
+              <TableCell align="right">
+                {row.carbohydrates_grams_taken}
+              </TableCell>
+              <TableCell align="right">{row.dairy_grams_taken}</TableCell>
+              <TableCell align="right">{row.dessert_grams_taken}</TableCell>
+              <TableCell align="right">
+                {new Date(row.time_taken).toLocaleString()}
+              </TableCell>
+              <TableCell align="right">
+                {row.pickup_time
+                  ? new Date(row.pickup_time).toLocaleString()
+                  : "-"}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
