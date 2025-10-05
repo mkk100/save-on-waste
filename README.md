@@ -58,5 +58,3 @@ create table listings (
 ## ☁️ Deployment
 Deploy on **Vercel** and link your **Supabase** project for seamless SSR auth and DB integration.
 
-## 📜 License
-MIT
