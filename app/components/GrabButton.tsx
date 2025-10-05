@@ -68,6 +68,28 @@ export default function GrabButton({
     return true;
   };
 
+  const handleGrab = () => {
+    // Check all validations before proceeding
+    const maxValues = {
+      meat: meat_grams,
+      vegetables: vegetable_grams,
+      carbohydrates: carbohydrates_grams,
+      dairy: dairy_grams,
+      dessert: dessert_grams,
+    };
+
+    for (const [category, value] of Object.entries(pickupAmounts)) {
+      const maxValue = maxValues[category as keyof typeof maxValues];
+      if (!validateInput(category, value || maxValue.toString(), maxValue)) {
+        return; // Stop if validation fails
+      }
+    }
+
+    // If all validations pass, process the grab
+    console.log("Grabbed amounts:", pickupAmounts);
+    handleClose();
+  };
+
   return (
     <>
       <Button variant="contained" color="primary" onClick={handleOpen}>
@@ -107,17 +129,6 @@ export default function GrabButton({
             Food Available
           </Typography>
 
-          {alertMessage && (
-            <Alert
-              variant="filled"
-              severity="error"
-              sx={{ mt: 2, mb: 2 }}
-              onClose={() => setAlertMessage(null)}
-            >
-              {alertMessage}
-            </Alert>
-          )}
-
           <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
             {/* Meat */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -129,9 +140,7 @@ export default function GrabButton({
               value={pickupAmounts.meat || meat_grams.toString()}
               onChange={(e) => {
                 const value = e.target.value;
-                if (validateInput("meat", value, meat_grams)) {
                 safeUpdatePickup("meat", value);
-                }
               }}
               size="small"
               type="number"
@@ -150,9 +159,7 @@ export default function GrabButton({
                 value={pickupAmounts.vegetables || vegetable_grams.toString()}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("vegetables", value, vegetable_grams)) {
-                    safeUpdatePickup("vegetables", value);
-                  }
+                  safeUpdatePickup("vegetables", value);
                 }}
                 size="small"
                 type="number"
@@ -171,9 +178,7 @@ export default function GrabButton({
                 value={pickupAmounts.carbohydrates || carbohydrates_grams.toString()}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("carbohydrates", value, carbohydrates_grams)) {
-                    safeUpdatePickup("carbohydrates", value);
-                  }
+                  safeUpdatePickup("carbohydrates", value);
                 }}
                 size="small"
                 type="number"
@@ -192,9 +197,7 @@ export default function GrabButton({
                 value={pickupAmounts.dairy || dairy_grams.toString()}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("dairy", value, dairy_grams)) {
-                    safeUpdatePickup("dairy", value);
-                  }
+                  safeUpdatePickup("dairy", value);
                 }}
                 size="small"
                 type="number"
@@ -213,9 +216,7 @@ export default function GrabButton({
                 value={pickupAmounts.dessert || dessert_grams.toString()} 
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("dessert", value, dessert_grams)) {
-                    safeUpdatePickup("dessert", value);
-                  }
+                  safeUpdatePickup("dessert", value);
                 }}
                 size="small"
                 type="number"
@@ -225,10 +226,21 @@ export default function GrabButton({
             </Box>
           </Box>
 
+          {alertMessage && (
+            <Alert
+              variant="filled"
+              severity="error"
+              sx={{ mt: 2, mb: 2 }}
+              onClose={() => setAlertMessage(null)}
+            >
+              {alertMessage}
+            </Alert>
+          )}
+
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
               <Button
                 variant="contained"
-                onClick={handleClose}
+                onClick={handleGrab}
                 sx={{
                 backgroundColor: '#4CAF50',
                 '&:hover': { backgroundColor: '#45a049' },
