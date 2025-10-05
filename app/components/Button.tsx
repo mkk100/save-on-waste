@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Modal, Box, Typography, Slide, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
+import { Button, Modal, Box, Typography, Zoom, TextField, Select, MenuItem, FormControl, InputLabel, Chip } from '@mui/material';
 import { useState } from 'react';
 
 const modalStyle = {
@@ -23,6 +23,7 @@ export default function UploadButton() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [addedCategories, setAddedCategories] = useState<string[]>([]);
   const [foodWeight, setFoodWeight] = useState('');
+  const [address, setAddress] = useState('');
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
@@ -32,6 +33,7 @@ export default function UploadButton() {
   };
 
   const handleConfirm = () => {
+    console.log('Address:', address);
     console.log('Categories:', addedCategories);
     console.log('Weight:', foodWeight);
     setOpen(false);
@@ -48,15 +50,25 @@ export default function UploadButton() {
         onClose={() => setOpen(false)}
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        <Slide direction="up" in={open} mountOnEnter unmountOnExit>
+        <Zoom in={open}>
           <Box sx={modalStyle}>
-            <Typography variant="h6" sx={{ mb: 3 }}>
+            <Typography variant="h6" sx={{ mb: 3 }} color='black'>
               Enter Details
             </Typography>
 
+            <Typography variant="body1">Address:</Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter your address"
+              sx={{ mb: 2 }}
+            />
+
             <Typography variant="body1">Category of food:</Typography>
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Select category</InputLabel>
+              <InputLabel>Select food category</InputLabel>
               <Select
                 value={selectedCategory}
                 onChange={(e) => handleCategoryChange(e.target.value)}
@@ -64,7 +76,7 @@ export default function UploadButton() {
               >
                 {foodCategories.map((category) => (
                   <MenuItem key={category} value={category}>
-                    Add {category}
+                    {category}
                   </MenuItem>
                 ))}
               </Select>
@@ -110,7 +122,7 @@ export default function UploadButton() {
               </Button>
             </Box>
           </Box>
-        </Slide>
+        </Zoom>
       </Modal>
     </>
   );
