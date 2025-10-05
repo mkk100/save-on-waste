@@ -4,6 +4,7 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client"; // Change to client
+import GrabButton from "@/app/components/GrabButton";
 
 interface Business {
   uuid: number;
@@ -13,6 +14,11 @@ interface Business {
   name: string;
   latitude: number;
   longitude: number;
+  meat_grams: number;
+  vegetables_grams: number;
+  carbohydrates_grams: number;
+  dairy_grams: number;
+  dessert_grams: number;
 }
 
 // Fix for default markers
@@ -35,6 +41,7 @@ export default function MapComponent() {
           .from("businesses")
           .select();
         if (businessData) {
+          console.log(businessData);
           setBusinesses(businessData);
         }
       } catch (error) {
@@ -70,7 +77,17 @@ export default function MapComponent() {
           key={business.uuid || index}
           position={[business.latitude, business.longitude]}
         >
-          <Popup>{business.name}</Popup>
+          <Popup>
+            {business.name}
+            <br />
+            <GrabButton
+              meat_grams={business.meat_grams}
+              vegetable_grams={business.vegetables_grams}
+              carbohydrates_grams={business.carbohydrates_grams}
+              dairy_grams={business.dairy_grams}
+              dessert_grams={business.dessert_grams}
+            />
+          </Popup>
         </Marker>
       ))}
     </MapContainer>
