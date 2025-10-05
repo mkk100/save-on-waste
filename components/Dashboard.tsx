@@ -5,12 +5,13 @@ import { ThemeContext } from "@emotion/react";
 
 import { useEffect, useState } from "react";
 import { isCharityUser } from "@/app/AccountProvider";
+import { createClient } from "@/lib/supabase/client";
 
 export default function Dashboard() {
   const router = useRouter();
   const [isCharity, setIsCharity] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
-
+  const supabase = createClient();
   useEffect(() => {
     const checkCharity = async () => {
       console.log("Checking charity status..."); // Add this to verify execution
@@ -28,6 +29,20 @@ export default function Dashboard() {
 
     checkCharity();
   }, []);
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error);
+      } else {
+        console.log("Successfully signed out");
+        // Redirect to login or home page after signout
+        router.push("/auth/login"); // or wherever you want to redirect
+      }
+    } catch (error) {
+      console.error("Unexpected error during signout:", error);
+    }
+  };
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -56,6 +71,7 @@ export default function Dashboard() {
           src="/favicon.ico"
           alt="Account Logo"
           className="w-12 h-12 rounded-md object-cover justify-self-end"
+          onClick={handleSignOut}
         />
       </header>
     </ThemeContext.Provider>
