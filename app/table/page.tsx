@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Dashboard from "@/components/Dashboard";
 import Table from "@/components/table";

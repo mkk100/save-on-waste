@@ -10,6 +10,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 
+type PickupField = "meat" | "vegetables" | "carbohydrates" | "dairy" | "dessert";
+
+type PickupState = Record<PickupField, string>;
+
 export type GrabButtonProps = {
   meat_grams: number;
   vegetable_grams: number;
@@ -26,8 +30,8 @@ export default function GrabButton({
   dessert_grams,
 }: GrabButtonProps) {
   const [open, setOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [pickupAmounts, setPickupAmounts] = useState({
+  const [alertMessages, setAlertMessages] = useState<string[]>([]);
+  const [pickupAmounts, setPickupAmounts] = useState<PickupState>({
     meat: "",
     vegetables: "",
     carbohydrates: "",
@@ -35,37 +39,78 @@ export default function GrabButton({
     dessert: "",
   });
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = () => {
+    setPickupAmounts({
+      meat: String(meat_grams ?? 0),
+      vegetables: String(vegetable_grams ?? 0),
+      carbohydrates: String(carbohydrates_grams ?? 0),
+      dairy: String(dairy_grams ?? 0),
+      dessert: String(dessert_grams ?? 0),
+    });
+    setOpen(true);
+  };
   const handleClose = () => {
     setOpen(false);
-    setAlertMessage(null);
+    setAlertMessages([]);
   };
 
   const safeUpdatePickup = (name: keyof typeof pickupAmounts, value: string) => {
     setPickupAmounts((prev) => ({ ...prev, [name]: value }));
-    if (alertMessage) {
-      setAlertMessage(null);
+    if (alertMessages.length > 0) {
+      setAlertMessages([]);
     }
   };
 
-  const validateInput = (label: string, rawValue: string, maxValue: number) => {
-    if (rawValue === "") {
-      return true;
+  const labelMap: Record<PickupField, string> = {
+    meat: "Meat",
+    vegetables: "Vegetables",
+    carbohydrates: "Carbohydrates",
+    dairy: "Dairy",
+    dessert: "Dessert",
+  };
+
+  const handleGrab = () => {
+    // Check all validations before proceeding
+    const maxValues = {
+      meat: meat_grams,
+      vegetables: vegetable_grams,
+      carbohydrates: carbohydrates_grams,
+      dairy: dairy_grams,
+      dessert: dessert_grams,
+    };
+
+    const errors: string[] = [];
+
+    (Object.entries(pickupAmounts) as Array<[PickupField, string]>).forEach(
+      ([category, value]) => {
+        const maxValue = maxValues[category];
+        if (value === "") {
+          return;
+        }
+
+        const numericValue = Number(value);
+
+        if (!Number.isFinite(numericValue) || numericValue < 0) {
+          errors.push(`Enter a non-negative number for ${labelMap[category]}.`);
+          return;
+        }
+
+        if (numericValue > maxValue) {
+          errors.push(
+            `You cannot pick more than ${maxValue}g of ${labelMap[category]}.`,
+          );
+        }
+      },
+    );
+
+    if (errors.length > 0) {
+      setAlertMessages(errors);
+      return;
     }
 
-    const numericValue = Number(rawValue);
-
-    if (!Number.isFinite(numericValue) || numericValue < 0) {
-      setAlertMessage(`Enter a non-negative number for ${label}.`);
-      return false;
-    }
-
-    if (numericValue > maxValue) {
-      setAlertMessage(`You cannot pick more than ${maxValue}g of ${label}.`);
-      return false;
-    }
-
-    return true;
+    // If all validations pass, process the grab
+    console.log("Grabbed amounts:", pickupAmounts);
+    handleClose();
   };
 
   return (
@@ -107,17 +152,6 @@ export default function GrabButton({
             Food Available
           </Typography>
 
-          {alertMessage && (
-            <Alert
-              variant="filled"
-              severity="error"
-              sx={{ mt: 2, mb: 2 }}
-              onClose={() => setAlertMessage(null)}
-            >
-              {alertMessage}
-            </Alert>
-          )}
-
           <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 2 }}>
             {/* Meat */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -126,12 +160,10 @@ export default function GrabButton({
               </Typography>
               <TextField
               name="meat"
-              value={pickupAmounts.meat || meat_grams.toString()}
+              value={pickupAmounts.meat}
               onChange={(e) => {
                 const value = e.target.value;
-                if (validateInput("meat", value, meat_grams)) {
                 safeUpdatePickup("meat", value);
-                }
               }}
               size="small"
               type="number"
@@ -147,12 +179,10 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="vegetables"
-                value={pickupAmounts.vegetables || vegetable_grams.toString()}
+                value={pickupAmounts.vegetables}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("vegetables", value, vegetable_grams)) {
-                    safeUpdatePickup("vegetables", value);
-                  }
+                  safeUpdatePickup("vegetables", value);
                 }}
                 size="small"
                 type="number"
@@ -168,12 +198,10 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="carbohydrates"
-                value={pickupAmounts.carbohydrates || carbohydrates_grams.toString()}
+                value={pickupAmounts.carbohydrates}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("carbohydrates", value, carbohydrates_grams)) {
-                    safeUpdatePickup("carbohydrates", value);
-                  }
+                  safeUpdatePickup("carbohydrates", value);
                 }}
                 size="small"
                 type="number"
@@ -189,12 +217,10 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="dairy"
-                value={pickupAmounts.dairy || dairy_grams.toString()}
+                value={pickupAmounts.dairy}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("dairy", value, dairy_grams)) {
-                    safeUpdatePickup("dairy", value);
-                  }
+                  safeUpdatePickup("dairy", value);
                 }}
                 size="small"
                 type="number"
@@ -210,12 +236,10 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="dessert"
-                value={pickupAmounts.dessert || dessert_grams.toString()} 
+                value={pickupAmounts.dessert} 
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (validateInput("dessert", value, dessert_grams)) {
-                    safeUpdatePickup("dessert", value);
-                  }
+                  safeUpdatePickup("dessert", value);
                 }}
                 size="small"
                 type="number"
@@ -225,10 +249,25 @@ export default function GrabButton({
             </Box>
           </Box>
 
+          {alertMessages.length > 0 && (
+            <Alert
+              variant="filled"
+              severity="error"
+              sx={{ mt: 2, mb: 2 }}
+              onClose={() => setAlertMessages([])}
+            >
+              <Box component="ul" sx={{ pl: 3, mb: 0 }}>
+                {alertMessages.map((message) => (
+                  <li key={message}>{message}</li>
+                ))}
+              </Box>
+            </Alert>
+          )}
+
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
               <Button
                 variant="contained"
-                onClick={handleClose}
+                onClick={handleGrab}
                 sx={{
                 backgroundColor: '#4CAF50',
                 '&:hover': { backgroundColor: '#45a049' },

@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -73,7 +75,7 @@ const rows: Row[] = [
   ),
 ];
 
-export default function DenseTable() {
+export default function FoodWasteTable() {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 800 }} size="small" aria-label="donation table">
