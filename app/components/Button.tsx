@@ -17,49 +17,50 @@ const foodCategories = ['Meat', 'Dairy', 'Vegetables', 'Carbs'];
 export default function UploadButton() {
   const [open, setOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [addedCategories, setAddedCategories] = useState<string[]>([]);
-  const [categoryWeights, setCategoryWeights] = useState<Record<string, string>>({});
+  const [categoryEntries, setCategoryEntries] = useState<Array<{ category: string; weight: string }>>([]);
   const [address, setAddress] = useState('');
 
+  const canSubmit =
+    address.trim().length > 0 &&
+    categoryEntries.length > 0 &&
+    categoryEntries.every(({ weight }) => {
+      const value = Number(weight);
+      return Number.isFinite(value) && value > 0;
+    });
+
   const handleCategoryChange = (value: string) => {
-    setSelectedCategory(value);
-    if (!value) {
-      return;
+    if (value) {
+      setCategoryEntries((prev) => {
+        if (prev.some((entry) => entry.category === value)) {
+          return prev;
+        }
+        return [...prev, { category: value, weight: '' }];
+      });
     }
 
-    setAddedCategories((prev) => {
-      if (prev.includes(value)) {
-        return prev;
-      }
-      return [...prev, value];
-    });
-
-    setCategoryWeights((prev) => {
-      if (prev[value] !== undefined) {
-        return prev;
-      }
-      return { ...prev, [value]: '' };
-    });
+    setSelectedCategory('');
   };
 
   const handleCategoryWeightChange = (category: string, weight: string) => {
-    setCategoryWeights((prev) => ({ ...prev, [category]: weight }));
+    setCategoryEntries((prev) =>
+      prev.map((entry) =>
+        entry.category === category ? { ...entry, weight } : entry
+      )
+    );
   };
 
   const handleRemoveCategory = (category: string) => {
-    setAddedCategories((prev) => prev.filter((c) => c !== category));
-    setCategoryWeights((prev) => {
-      const { [category]: _removed, ...rest } = prev;
-      return rest;
-    });
+    setCategoryEntries((prev) => prev.filter((entry) => entry.category !== category));
   };
 
   const handleConfirm = () => {
     console.log('Address:', address);
-    console.log('Category weights:', addedCategories.map((category) => ({
-      category,
-      weight: categoryWeights[category] ?? '',
-    })));
+    console.log('Category weights:', categoryEntries);
+    
+    // Always clear data
+    setAddress('');
+    setCategoryEntries([]);
+    setSelectedCategory('');
     setOpen(false);
   };
 
@@ -84,6 +85,7 @@ export default function UploadButton() {
             <TextField
               fullWidth
               variant="outlined"
+              required
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Enter your address"
@@ -92,25 +94,36 @@ export default function UploadButton() {
 
             <Typography variant="body1">Category of food:</Typography>
             <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>Select food category</InputLabel>
+              {/* <InputLabel id="food-category-label" shrink>
+                Select food category
+              </InputLabel> */}
               <Select
+                labelId="food-category-label"
                 value={selectedCategory}
                 onChange={(e) => handleCategoryChange(e.target.value)}
-                label="Select category"
+                // label="Select food category"
+                displayEmpty
+                renderValue={(value) =>
+                  value ? value : <Typography color="text.secondary">Choose a category</Typography>
+                }
               >
                 {foodCategories.map((category) => (
-                  <MenuItem key={category} value={category}>
+                  <MenuItem
+                    key={category}
+                    value={category}
+                    disabled={categoryEntries.some((entry) => entry.category === category)}
+                  >
                     {category}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {addedCategories.length > 0 && (
+            {categoryEntries.length > 0 ? (
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body2" sx={{ mb: 1 }}>Selected categories:</Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {addedCategories.map((category) => (
+                  {categoryEntries.map(({ category, weight }) => (
                     <Box key={category} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       <Chip
                         label={category}
@@ -122,7 +135,8 @@ export default function UploadButton() {
                         label="Weight (kg)"
                         type="number"
                         fullWidth
-                        value={categoryWeights[category] ?? ''}
+                        required
+                        value={weight}
                         onChange={(e) => handleCategoryWeightChange(category, e.target.value)}
                         inputProps={{ min: 0, step: 'any' }}
                         sx={{ flexGrow: 1 }}
@@ -131,12 +145,17 @@ export default function UploadButton() {
                   ))}
                 </Box>
               </Box>
+            ) : (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                Select a category to start tracking its weight.
+              </Typography>
             )}
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
               <Button
                 variant="contained"
                 onClick={handleConfirm}
+                disabled={!canSubmit}
                 sx={{
                   backgroundColor: '#4CAF50',
                   '&:hover': { backgroundColor: '#45a049' },
