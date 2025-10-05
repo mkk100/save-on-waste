@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-
+import UploadButton from "./components/UploadButton";
 const LazyMap = dynamic(() => import("@/components/Map"), {
   ssr: false,
   loading: () => <p>Loading...</p>,
@@ -9,8 +9,9 @@ const LazyMap = dynamic(() => import("@/components/Map"), {
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24 bg-slate-200">
+    <main className="flex min-h-screen flex-col items-center p-24 bg-slate-200">
       <LazyMap />
+      <UploadButton />
     </main>
   );
 }
