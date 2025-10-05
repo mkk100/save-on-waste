@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import UploadButton from "./components/UploadButton";
 import Dashboard from "@/components/Dashboard";
 
 const LazyMap = dynamic(() => import("@/components/Map"), {
