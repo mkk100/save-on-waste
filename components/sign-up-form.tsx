@@ -15,6 +15,13 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 export function SignUpForm({
   className,
@@ -25,6 +32,7 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [accountType, setAccountType] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -40,7 +48,7 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -48,7 +56,20 @@ export function SignUpForm({
         },
       });
       if (error) throw error;
-      router.push("/auth/sign-up-success");
+      const uid = data.user?.id;
+      if (uid && accountType) {
+        // Save to a user_profiles table or similar
+        const { error: profileError } = await supabase
+          .from("profiles") // Adjust table name as needed
+          .upsert({
+            user_id: uid,
+            account_type: JSON.stringify(accountType).toLowerCase().replace(/"/g, ""),
+          });
+        if (profileError) {
+          console.error("Error saving profile:", profileError);
+        }
+        router.push("/auth/sign-up-success");
+      }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -100,6 +121,35 @@ export function SignUpForm({
                   value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
                 />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="accountType">Account Type</Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between"
+                    >
+                      {accountType || "Select account type"}
+                      <ChevronDown className="h-4 w-4 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full">
+                    <DropdownMenuItem onClick={() => setAccountType("Charity")}>
+                      Charity
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setAccountType("Business")}
+                    >
+                      Business
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                {!accountType && (
+                  <p className="text-sm text-red-500">
+                    Please select an account type.
+                  </p>
+                )}
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
