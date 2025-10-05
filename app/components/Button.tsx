@@ -9,16 +9,16 @@ const modalStyle = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: 'background.paper',
+  bgcolor : 'background.paper',
+//   background: 'linear-gradient(135deg, #4CAF50 0%, #8BC34A 25%, #66BB6A 50%, #4CAF50 75%, #2E7D32 100%)',
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
-  outline: 'none', // Remove focus outline
+  outline: 'none',
 };
 
 export default function UploadButton() {
   const [open, setOpen] = useState(false);
-  const [businessName, setBusinessName] = useState('');
   const [foodCategory, setFoodCategory] = useState('');
   const [foodWeight, setFoodWeight] = useState('');
 
@@ -49,7 +49,7 @@ export default function UploadButton() {
           <Box sx={modalStyle}>
 
             <Typography id="modal-modal-title" variant="h6" component="h2" color='black' sx={{ mb: 3 }}>
-                Upload Food Details
+                Enter Details
             </Typography>
 
               <Typography variant="body1">Category of food:</Typography>
