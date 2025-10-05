@@ -41,7 +41,6 @@ export default function MapComponent() {
           .from("businesses")
           .select();
         if (businessData) {
-          console.log(businessData);
           setBusinesses(businessData);
         }
       } catch (error) {
