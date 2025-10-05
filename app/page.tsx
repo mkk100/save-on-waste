@@ -1,14 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+"use client";
 
-export default async function Instruments() {
-  const supabase = await createClient();
-  const { data: instruments } = await supabase.from("businesses").select();
+import dynamic from "next/dynamic";
 
+const LazyMap = dynamic(() => import("@/components/Map"), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
+
+export default function Home() {
   return (
-    <pre>
-      {JSON.stringify(instruments, null, 2)}
-      <Button>Hello World</Button>
-    </pre>
+    <main>
+      <LazyMap />
+      hiii
+    </main>
   );
 }
