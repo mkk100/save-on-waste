@@ -13,23 +13,26 @@ L.Icon.Default.mergeOptions({
 
 export default function MapComponent() {
   const position: [number, number] = [51.505, -0.09];
-
   return (
-    <MapContainer
-      center={position}
-      zoom={11}
-      scrollWheelZoom={true}
-      style={{ height: "400px", width: "600px" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <Marker position={position}>
-        <Popup>
-          A pretty CSS3 popup. <br /> Easily customizable.
-        </Popup>
-      </Marker>
-    </MapContainer>
+    <>
+      <div className="fixed top-16 left-0 right-0 bottom-0">
+        <MapContainer
+          center={position}
+          zoom={11}
+          scrollWheelZoom={true}
+          className="w-full h-full"
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <Marker position={position}>
+            <Popup>
+              A pretty CSS3 popup. <br /> Easily customizable.
+            </Popup>
+          </Marker>
+        </MapContainer>
+      </div>
+    </>
   );
 }
