@@ -35,7 +35,16 @@ export default function GrabButton({
     dessert: "",
   });
 
-  const handleOpen = () => setOpen(true);
+  const handleOpen = () => {
+    setPickupAmounts({
+      meat: String(meat_grams ?? 0),
+      vegetables: String(vegetable_grams ?? 0),
+      carbohydrates: String(carbohydrates_grams ?? 0),
+      dairy: String(dairy_grams ?? 0),
+      dessert: String(dessert_grams ?? 0),
+    });
+    setOpen(true);
+  };
   const handleClose = () => {
     setOpen(false);
     setAlertMessage(null);
@@ -137,7 +146,7 @@ export default function GrabButton({
               </Typography>
               <TextField
               name="meat"
-              value={pickupAmounts.meat || meat_grams.toString()}
+              value={pickupAmounts.meat}
               onChange={(e) => {
                 const value = e.target.value;
                 safeUpdatePickup("meat", value);
@@ -156,7 +165,7 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="vegetables"
-                value={pickupAmounts.vegetables || vegetable_grams.toString()}
+                value={pickupAmounts.vegetables}
                 onChange={(e) => {
                   const value = e.target.value;
                   safeUpdatePickup("vegetables", value);
@@ -175,7 +184,7 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="carbohydrates"
-                value={pickupAmounts.carbohydrates || carbohydrates_grams.toString()}
+                value={pickupAmounts.carbohydrates}
                 onChange={(e) => {
                   const value = e.target.value;
                   safeUpdatePickup("carbohydrates", value);
@@ -194,7 +203,7 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="dairy"
-                value={pickupAmounts.dairy || dairy_grams.toString()}
+                value={pickupAmounts.dairy}
                 onChange={(e) => {
                   const value = e.target.value;
                   safeUpdatePickup("dairy", value);
@@ -213,7 +222,7 @@ export default function GrabButton({
               </Typography>
               <TextField
                 name="dessert"
-                value={pickupAmounts.dessert || dessert_grams.toString()} 
+                value={pickupAmounts.dessert} 
                 onChange={(e) => {
                   const value = e.target.value;
                   safeUpdatePickup("dessert", value);
