@@ -10,6 +10,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import TextField from "@mui/material/TextField";
 import Alert from "@mui/material/Alert";
 
+type PickupField = "meat" | "vegetables" | "carbohydrates" | "dairy" | "dessert";
+
+type PickupState = Record<PickupField, string>;
+
 export type GrabButtonProps = {
   meat_grams: number;
   vegetable_grams: number;
@@ -26,8 +30,8 @@ export default function GrabButton({
   dessert_grams,
 }: GrabButtonProps) {
   const [open, setOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [pickupAmounts, setPickupAmounts] = useState({
+  const [alertMessages, setAlertMessages] = useState<string[]>([]);
+  const [pickupAmounts, setPickupAmounts] = useState<PickupState>({
     meat: "",
     vegetables: "",
     carbohydrates: "",
@@ -47,34 +51,22 @@ export default function GrabButton({
   };
   const handleClose = () => {
     setOpen(false);
-    setAlertMessage(null);
+    setAlertMessages([]);
   };
 
   const safeUpdatePickup = (name: keyof typeof pickupAmounts, value: string) => {
     setPickupAmounts((prev) => ({ ...prev, [name]: value }));
-    if (alertMessage) {
-      setAlertMessage(null);
+    if (alertMessages.length > 0) {
+      setAlertMessages([]);
     }
   };
 
-  const validateInput = (label: string, rawValue: string, maxValue: number) => {
-    if (rawValue === "") {
-      return true;
-    }
-
-    const numericValue = Number(rawValue);
-
-    if (!Number.isFinite(numericValue) || numericValue < 0) {
-      setAlertMessage(`Enter a non-negative number for ${label}.`);
-      return false;
-    }
-
-    if (numericValue > maxValue) {
-      setAlertMessage(`You cannot pick more than ${maxValue}g of ${label}.`);
-      return false;
-    }
-
-    return true;
+  const labelMap: Record<PickupField, string> = {
+    meat: "Meat",
+    vegetables: "Vegetables",
+    carbohydrates: "Carbohydrates",
+    dairy: "Dairy",
+    dessert: "Dessert",
   };
 
   const handleGrab = () => {
@@ -87,11 +79,33 @@ export default function GrabButton({
       dessert: dessert_grams,
     };
 
-    for (const [category, value] of Object.entries(pickupAmounts)) {
-      const maxValue = maxValues[category as keyof typeof maxValues];
-      if (!validateInput(category, value || maxValue.toString(), maxValue)) {
-        return; // Stop if validation fails
-      }
+    const errors: string[] = [];
+
+    (Object.entries(pickupAmounts) as Array<[PickupField, string]>).forEach(
+      ([category, value]) => {
+        const maxValue = maxValues[category];
+        if (value === "") {
+          return;
+        }
+
+        const numericValue = Number(value);
+
+        if (!Number.isFinite(numericValue) || numericValue < 0) {
+          errors.push(`Enter a non-negative number for ${labelMap[category]}.`);
+          return;
+        }
+
+        if (numericValue > maxValue) {
+          errors.push(
+            `You cannot pick more than ${maxValue}g of ${labelMap[category]}.`,
+          );
+        }
+      },
+    );
+
+    if (errors.length > 0) {
+      setAlertMessages(errors);
+      return;
     }
 
     // If all validations pass, process the grab
@@ -235,14 +249,18 @@ export default function GrabButton({
             </Box>
           </Box>
 
-          {alertMessage && (
+          {alertMessages.length > 0 && (
             <Alert
               variant="filled"
               severity="error"
               sx={{ mt: 2, mb: 2 }}
-              onClose={() => setAlertMessage(null)}
+              onClose={() => setAlertMessages([])}
             >
-              {alertMessage}
+              <Box component="ul" sx={{ pl: 3, mb: 0 }}>
+                {alertMessages.map((message) => (
+                  <li key={message}>{message}</li>
+                ))}
+              </Box>
             </Alert>
           )}
 
